@@ -402,6 +402,10 @@ div.valu_form {
     overflow: hidden;
 }
 
+.valu_form #aps_valu_otp_field .install-line {
+    margin: 20px 0px;
+}
+
 .tenure_carousel .tenureBox {
     text-align: center;
     border: 1px solid #ccc;

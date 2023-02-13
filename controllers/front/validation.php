@@ -524,6 +524,7 @@ class AmazonpaymentservicesValidationModuleFrontController extends ModuleFrontCo
         $active_tenure   = Tools::getValue('active_tenure');
         $tenure_amount   = Tools::getValue('tenure_amount');
         $tenure_interest = Tools::getValue('tenure_interest');
+        $otp = Tools::getValue('aps_otp');
         if (empty($active_tenure)) {
             $success   = false;
             $error_msg = $this->module->l('Please select installment plan.');
@@ -531,7 +532,7 @@ class AmazonpaymentservicesValidationModuleFrontController extends ModuleFrontCo
             $reference_id   = Context::getContext()->cookie->__get('aps_valu_reference_id');
             $id_order       = Context::getContext()->cookie->__get('aps_valu_id_order');
             $mobile_number  = Context::getContext()->cookie->__get('aps_valu_mobile_number');
-            $otp            = Context::getContext()->cookie->__get('aps_valu_otp');
+            //$otp            = Context::getContext()->cookie->__get('aps_valu_otp');
             $transaction_id = Context::getContext()->cookie->__get('aps_valu_transaction_id');
             if (!empty($reference_id)) {
                 ApsOrder::saveApsPaymentMetaData($id_order, 'valu_reference_id', $reference_id);

@@ -233,7 +233,7 @@ var apsPayment = (function () {
             $( '#verfiy_otp_sec' ).slideDown().addClass( 'active' );
         },
         valuTenureBox: function( response ) {
-            $( '.valu_form.active' ).slideUp().removeClass( 'active' );
+            //$( '.valu_form.active' ).slideUp().removeClass( 'active' );
             $( '#tenure_sec' ).slideDown().addClass( 'active' );
             $( '#tenure_sec .tenure' ).html( response.tenure_html );
             $( '#tenure_sec .tenure .tenure_carousel' ).slick(
@@ -697,6 +697,7 @@ $( document.body ).on(
                         if ( 'success' === response.status ) {
                             $( '.aps-loader' ).hide();
                             apsPayment.valuOtpVerifyBox( response );
+                            apsPayment.valuTenureBox( response );
                         } else if ('genotp_error' === response.status) {
                             $( '.aps-loader' ).hide();
                             $( '.valu_process_error' ).html( response.message );
@@ -755,6 +756,8 @@ $( document.body ).on(
         var tenure  = ele.attr( 'data-tenure' );
         var tenure_amount   = ele.attr( 'data-tenure-amount' );
         var tenure_interest = ele.attr( 'data-tenure-interest' );
+        var otp = $( '.aps_valu_otp').val();
+        $( '#aps_otp').val(otp);
         $( '#aps_active_tenure' ).val( tenure );
         $( '#aps_tenure_amount' ).val( tenure_amount );
         $( '#aps_tenure_interest' ).val( tenure_interest );

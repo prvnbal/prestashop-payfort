@@ -703,6 +703,7 @@ class AmazonpaymentservicesPayment extends AmazonpaymentservicesSuper
     public function valuOtpGenerate($mobile_number, $reference_id)
     {
         $status  = 'success';
+        $tenure_html = '';
         $message = $this->module->l('OTP Generated', 'amazonpaymentservicespayment');
         try {
             $id_order                  = $this->aps_order->getSessionOrderId();
@@ -722,6 +723,7 @@ class AmazonpaymentservicesPayment extends AmazonpaymentservicesSuper
                 'amount'              => $this->aps_helper->convertGatewayAmount($this->aps_order->getTotal(), $this->aps_order->getCurrencyValue(), $currency),
                 'currency'            => $currency,
                 'products'            => $products[0],
+                'include_installments' => 'YES'
             );
 
             $signature = $this->aps_helper->calculateSignature($gateway_params, 'request');
@@ -746,7 +748,7 @@ class AmazonpaymentservicesPayment extends AmazonpaymentservicesSuper
 
                 $message  = sprintf($this->module->l('OTP has been sent to you on your mobile number %s', 'amazonpaymentservicespayment'), $mobile_number);
                 Context::getContext()->cookie->__set('aps_valu_id_order', $id_order);
-                Context::getContext()->cookie->__set('aps_valu_transaction_id', $response['transaction_id']);
+                Context::getContext()->cookie->__set('aps_valu_transaction_id', $response['merchant_order_id']);
             } else {
                 $status  = 'genotp_error';
                 $message = isset($response['response_message']) && ! empty($response['response_message']) ? $response['response_message'] : $valuapi_stop_message;
@@ -755,6 +757,26 @@ class AmazonpaymentservicesPayment extends AmazonpaymentservicesSuper
                     Context::getContext()->cookie->__unset('aps_valu_transaction_id');
                 }
             }
+            if (isset($response['response_code'])) {
+                $status                          = 'success';
+                $message                         = '';
+                $tenure_html                     = "<div class='tenure_carousel'>";
+                if ( isset( $response['installment_detail']['plan_details'] ) ) {
+                    foreach ( $response['installment_detail']['plan_details'] as $key => $ten ) {
+                        $tenure_html .= "<div class='slide'>
+                                <div class='tenureBox' data-tenure='" . $ten['number_of_installments'] . "' data-tenure-amount='" . $ten['amount_per_month'] ."' >
+                                    <p class='tenure'>" . $ten['number_of_installments'] ." ".$this->module->l('Months', 'amazonpaymentservicespayment')."</p>
+                                    <p class='emi'><strong>" . ( number_format($ten['amount_per_month']/100,2,'.','') ) . "</strong> EGP/".$this->module->l('Month', 'amazonpaymentservicespayment')."</p>
+                                    <p class='admin_fees'><strong class='alert-success'>" .$this->module->l('Admin Fees', 'amazonpaymentservicespayment')."</strong>"." ".( number_format($ten['fees_amount']/100,2,'.','') )."</p>
+                                </div>
+                            </div>";
+                    }
+                    $tenure_html .= '</div>';
+                }
+            } else {
+                $status  = 'error';
+                $message = isset($response['response_message']) && ! empty($response['response_message']) ? $response['response_message'] : $valuapi_stop_message;
+            }
         } catch (Exception $e) {
             $status  = 'error';
             $message = $this->module->l('Technical error occurred', 'amazonpaymentservicespayment').$e->getMessage();
@@ -762,6 +784,7 @@ class AmazonpaymentservicesPayment extends AmazonpaymentservicesSuper
         $response_arr = array(
             'status'  => $status,
             'message' => $message,
+            'tenure_html' => $tenure_html
         );
         return $response_arr;
     }
